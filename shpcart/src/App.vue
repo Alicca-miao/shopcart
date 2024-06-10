@@ -5,17 +5,17 @@
     <!-- 产品 -->
     <div class="product">
       <h4>商品信息</h4>
-      <table class="table table-hover table-bordered">
+      <table>
         <thead>
-           <tr>
+          <tr>
             <th>id</th>
             <th>名称</th>
-             <th>价格</th>
-             <th>操作</th>
-           </tr>
+            <th>价格</th>
+            <th>操作</th>
+          </tr>
         </thead>
         <tbody>
-          <tr v-for="(shop,index) in shoplist" :key="index" >
+          <tr v-for="(shop,index) in shop_list" :key="index">
             <td>{{ shop.id }}</td>
 
             <td>{{ shop.name }}</td>
@@ -37,38 +37,40 @@
     <!-- 购物车 -->
     <div>
       <h4>已选商品</h4>
-      <div class="grid-table">
-        <div class="header">id</div>
-        <div class="header">名称</div>
-        <div class="header">价格</div>
-        <div class="header">数量</div>
-        <div class="header">操作</div>
-        <div v-for="(shop, index) in cartProducts" :key="index">
-          <div class="cell">{{shop.id}}</div>
-          <div class="cell">{{shop.name}}</div>
-          <div class="cell">{{shop.price}}</div>
-          <div class="cell">{{shop.num}}</div>
-          <div class="cell">
-            <div @click="delProduct(shop)" class="btn btn-danger btn-sm">删除</div>
-          </div>
-        </div>
-        <div v-if="cartProducts.length === 0">
-          <div class="cell" colspan="5">您的购物车空空如也。。。</div>
-        </div>
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>名称</th>
+            <th>价格</th>
+            <th>数量</th>
+            <th>操作</th>
+          </tr>
+
+        </thead>
+        <tbody>
+          <tr v-for="(shop,index) in cartProducts" :key="index">
+            <td>{{ shop.id }}</td>
+            <td>{{ shop.name }}</td>
+            <td>{{ shop.price }}</td>
+            <td>{{ shop.num }}</td>
+            <td>
+              <div @click="delProduct(shop)">删除</div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
     </div>
 
     <!-- 计价器 -->
-    <div class="item-wrapper">
-      <div class="item">总数：<strong>{{totalNum}}</strong></div>
-      <div class="item">总价：<strong>{{totalPrice}}</strong></div>
-      <div class="item btn btn-danger" @click="clearAllCart">清空购物车</div>
-    </div>
 
 
 
 
-    
+
+
   </div>
 </template>
 
@@ -98,32 +100,46 @@ let data = reactive({
       cartProducts,
     });
 
-    const addToCart = (shop: ParamsProps) => {
-      const { id } = shop;
-      let record = data.cartProducts.find((n) => n.id == id);
-      // Array.prototype.find() 是 JavaScript 中数组的一个内置方法，用于找到并返回数组中满足提供的测试函数的第一个元素
-      if (record && record.num) {
-        record.num++;
-      } else {
+    const addtocart=function(shop:ParamsProps){
+      //参数是shop
+      //逻辑是，看number有无，没有则push+新增num属性
+      let {id}=shop
+      let record = data.cartProducts.find((n)=>{
+        return n.id===id
+        //返回的是等于id的那个shop整个元素
+      })
+      if(record && record.num){
+        record.num++
+      }
+      else{
         data.cartProducts.push({
           ...shop,
-          //为了和后面的num并列啊解构了对象（类型见useprops）
-          num: 1,
-        });
+          num:1
+        })
       }
-    };
+
+    }
 
     const clearAllCart = () => {
       data.cartProducts = [];
     };
 
-    const delProduct = ({ id }) => {
-      data.cartProducts.forEach(({ id: sid }, i) => {
-        if (id == sid) {
-          data.cartProducts.splice(i, 1);
-        }
-      });
-    };
+    // const delProduct = ({ id }) => {
+    //   data.cartProducts.forEach(({ id: sid }, i) => {
+    //     if (id === sid) {
+    //       data.cartProducts.splice(i, 1);
+    //     }
+    //   });
+    // };
+
+    const delProduct=(shop)=>{
+      let {id}=shop
+      data.cartProducts.forEach((item,i)=>{
+        let {id:sid}=item
+        if(sid===id)
+        data.cartProducts.splice(i,1)
+      })
+    }
 
     const totalPrice = computed(() => {
       let total = 0;
@@ -150,65 +166,5 @@ let data = reactive({
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
 
-.grid-table {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  margin: 0 auto;
-  max-width: 800px;
-  border: 1px solid #ddd;
-}
-
-.grid-table .header {
-  font-weight: bold;
-  background-color: #f2f2f2;
-  text-align: center;
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-
-.grid-table .cell {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
-.btn {
-  background-color: #17a2b8;
-  color: white;
-  padding: 5px 10px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background-color: #138496;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-}
-
-.btn-danger:hover {
-  background-color: #c82333;
-}
-
-.item-wrapper {
-  display: flex;
-  background-color: #dfdfdf;
-  align-items: center;
-  justify-content: center;
-}
-
-.item {
-  flex: 1;
-}
 </style>
